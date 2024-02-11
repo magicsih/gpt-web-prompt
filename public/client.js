@@ -2,7 +2,9 @@ const messageInput = document.getElementById('messageInput');
 const chatBox = document.getElementById('chatBox');
 const sendButton = document.getElementById('send');
 
-const ws = new WebSocket('ws://localhost:8080');
+// const ws = new WebSocket('ws://localhost:8080');
+const protocol = (window.location.protocol === "https:") ? "wss://" : "ws://";
+const ws = new WebSocket(`${protocol}${window.location.hostname}`);
 
 function createMessageElement(role) {
     console.log('createMessageElement:', role)
