@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #inputContainer {
+            display: flex;
+            flex-direction: row;
+            height: 150px;
+        }
+
+        #chatBox {
+            flex: 1;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            word-wrap: break-word;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+
+        .user {
+            background-color: #f0f0f0;
+            text-align: right;
+        }
+
+        .ai {
+            background-color: #d1eaff;
+            text-align: left;
+        }
+
+        #messageInput {
+            width: 100%;
+            /* Updated width */
+            height: auto;
+            /* Allow vertical resizing */
+            resize: vertical;
+            /* Allow vertical resizing only */            
+        }
+
+        #send {
+            width: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="chatBox"></div>
+        <div id="inputContainer">
+            <textarea id="messageInput" placeholder="Enter your message here"
+                onkeydown="if(event.altKey && event.keyCode === 13) { sendButton.onclick(); }"></textarea>
+            <button id="send">Send</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="client.js"></script>
+</body>
+
+</html>
