@@ -12,6 +12,11 @@ const BASIC_AUTH_PASSWORD = process.env['BASIC_AUTH_PASSWORD'] || 'admin';
 const PORT = process.env['PORT'] || 8080;
 const OPENAI_API_KEY = process.env['OPENAI_API_KEY'];
 
+console.log('BASIC_AUTH_USER:', BASIC_AUTH_USER);
+console.log('BASIC_AUTH_PASSWORD:', BASIC_AUTH_PASSWORD);
+console.log('PORT:', PORT);
+console.log('OPENAI_API_KEY:', OPENAI_API_KEY);
+
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
 });
