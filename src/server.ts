@@ -38,7 +38,7 @@ const authMiddleware = (req: any, res: any, next: any) => {
 };
 
 // Use the middleware
-// app.use(authMiddleware);
+app.use(authMiddleware);
 
 // WebSocket server with basic authentication
 const verifyClient = (info: any, done: any) => {
