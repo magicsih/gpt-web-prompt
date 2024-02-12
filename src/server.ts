@@ -64,6 +64,18 @@ app.use(express.static('public'));
 
 // WebSocket server
 wss.on('connection', ws => {
+
+
+    const interval = setInterval(function ping() {
+        wss.clients.forEach(function each(client) {
+            client.ping(function noop() { });
+        });
+    }, 5000); // 5초마다 핑
+
+    ws.on('pong', function incoming() {
+        // console.log("pong");
+    });
+
     ws.on('message', async (message) => {
         console.log('Received:', message.toString());
 
@@ -95,6 +107,10 @@ wss.on('connection', ws => {
                 ws.send(JSON.stringify({ role: 'ai', content: chunk.choices[0]?.delta?.content || '', "fin": false }));
             }
         }
+    });
+
+    ws.on('close', function clear() {
+        clearInterval(interval); // 연결이 끊기면 인터벌 클리어
     });
 
     ws.send(JSON.stringify({ role: 'ai', content: 'Hello! what can I do for you?', "fin": true }));
