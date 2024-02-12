@@ -41,6 +41,7 @@ ws.onmessage = (event) => {
     if (!currentMessageDiv) {
         currentMessageDiv = createMessageElement(role);
     }
+
     appendCharacterToMessageElement(currentMessageDiv, content);
 
     if (fin) {

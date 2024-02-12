@@ -4,6 +4,7 @@ import * as http from 'http';
 import * as WebSocket from 'ws';
 import OpenAI from "openai";
 import basicAuth from 'basic-auth';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const app = express();
 
@@ -11,11 +12,16 @@ const BASIC_AUTH_USER = process.env['BASIC_AUTH_USER']?.trim() || 'admin';
 const BASIC_AUTH_PASSWORD = process.env['BASIC_AUTH_PASSWORD']?.trim() || 'admin';
 const PORT = process.env['PORT'] || 8080;
 const OPENAI_API_KEY = process.env['OPENAI_API_KEY']?.trim();
+const GEMINI_API_KEY = process.env['GEMINI_API_KEY']?.trim() || '';
 
 console.log('BASIC_AUTH_USER:', BASIC_AUTH_USER);
 console.log('BASIC_AUTH_PASSWORD:', BASIC_AUTH_PASSWORD);
 console.log('PORT:', PORT);
 console.log('OPENAI_API_KEY:', OPENAI_API_KEY);
+console.log('GEMINI_API_KEY:', GEMINI_API_KEY);
+
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
@@ -59,15 +65,28 @@ app.use(express.static('public'));
 // WebSocket server
 wss.on('connection', ws => {
     ws.on('message', async (message) => {
-        console.log('Received:', message);
+        console.log('Received:', message.toString());
 
         try {
+            //await handleWithOpenAI();
+            const result = await model.generateContentStream([message.toString()]);
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                ws.send(JSON.stringify({ role: 'ai', content: chunkText || '', "fin": false }));
+            }
+            ws.send(JSON.stringify({ role: 'ai', content: '', "fin": true }));
+            console.log('Completed')
+        } catch (error) {
+            console.error('Error:', error);
+            ws.send('Error processing your request');
+        }
+
+        async function handleWithOpenAI() {
             const stream = await openai.chat.completions.create({
-                messages:
-                    [
-                        { role: 'system', content: "You are a helpful assistant. Focuses answers, without summarizing the questions, outputs in Markdown" },
-                        { role: 'user', content: message.toString() }
-                    ],
+                messages: [
+                    { role: 'system', content: "You are a helpful assistant. Focuses answers, without summarizing the questions, outputs in Markdown" },
+                    { role: 'user', content: message.toString() }
+                ],
                 model: 'gpt-3.5-turbo',
                 stream: true
             });
@@ -75,12 +94,6 @@ wss.on('connection', ws => {
             for await (const chunk of stream) {
                 ws.send(JSON.stringify({ role: 'ai', content: chunk.choices[0]?.delta?.content || '', "fin": false }));
             }
-
-            ws.send(JSON.stringify({ role: 'ai', content: '', "fin": true }));
-            console.log('Completed')
-        } catch (error) {
-            console.error('Error:', error);
-            ws.send('Error processing your request');
         }
     });
 
