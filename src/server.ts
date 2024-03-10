@@ -10,7 +10,7 @@ const app = express();
 
 const BASIC_AUTH_USER = process.env['BASIC_AUTH_USER']?.trim() || 'admin';
 const BASIC_AUTH_PASSWORD = process.env['BASIC_AUTH_PASSWORD']?.trim() || 'admin';
-const PORT = process.env['PORT'] || 8080;
+const PORT = process.env['PORT'] || 80;
 const OPENAI_API_KEY = process.env['OPENAI_API_KEY']?.trim();
 const GEMINI_API_KEY = process.env['GEMINI_API_KEY']?.trim() || '';
 
@@ -22,6 +22,7 @@ console.log('GEMINI_API_KEY:', GEMINI_API_KEY);
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+const chatSession = model.startChat();
 
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
@@ -64,12 +65,11 @@ app.use(express.static('public'));
 
 // WebSocket server
 wss.on('connection', ws => {
-
-
     const interval = setInterval(function ping() {
         wss.clients.forEach(function each(client) {
             client.ping(function noop() { });
         });
+
     }, 5000); // 5초마다 핑
 
     ws.on('pong', function incoming() {
@@ -80,17 +80,19 @@ wss.on('connection', ws => {
         console.log('Received:', message.toString());
 
         try {
-            //await handleWithOpenAI();
-            const result = await model.generateContentStream([message.toString()]);
+            //await handleWithOpenAI();            
+            // const result = await model.generateContentStream([message.toString()]);
+            const result = await chatSession.sendMessageStream(message.toString());
+
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
                 ws.send(JSON.stringify({ role: 'ai', content: chunkText || '', "fin": false }));
             }
             ws.send(JSON.stringify({ role: 'ai', content: '', "fin": true }));
             console.log('Completed')
-        } catch (error) {
+        } catch (error : any) {
             console.error('Error:', error);
-            ws.send('Error processing your request');
+            ws.send(JSON.stringify({ role: 'ai', content: `Sorry, error occured: ${error.message}`, "fin": true }));
         }
 
         async function handleWithOpenAI() {
