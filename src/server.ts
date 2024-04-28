@@ -22,7 +22,6 @@ console.log('GEMINI_API_KEY:', GEMINI_API_KEY);
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-const chatSession = model.startChat();
 
 const openai = new OpenAI({
     apiKey: OPENAI_API_KEY,
@@ -65,6 +64,8 @@ app.use(express.static('public'));
 
 // WebSocket server
 wss.on('connection', ws => {
+    const chatSession = model.startChat();
+
     const interval = setInterval(function ping() {
         wss.clients.forEach(function each(client) {
             client.ping(function noop() { });
@@ -77,19 +78,20 @@ wss.on('connection', ws => {
     });
 
     ws.on('message', async (message) => {
-        console.log('Received:', message.toString());
+        console.log(`User Input: ${message.toString()}`);
 
         try {
             //await handleWithOpenAI();            
             // const result = await model.generateContentStream([message.toString()]);
             const result = await chatSession.sendMessageStream(message.toString());
-
+            console.log(`=== Gemini BEGIN ===`);
             for await (const chunk of result.stream) {
                 const chunkText = chunk.text();
+                console.log(chunkText);
                 ws.send(JSON.stringify({ role: 'ai', content: chunkText || '', "fin": false }));
             }
             ws.send(JSON.stringify({ role: 'ai', content: '', "fin": true }));
-            console.log('Completed')
+            console.log('=== Gemini END ===');
         } catch (error : any) {
             console.error('Error:', error);
             ws.send(JSON.stringify({ role: 'ai', content: `Sorry, error occured: ${error.message}`, "fin": true }));
@@ -115,7 +117,7 @@ wss.on('connection', ws => {
         clearInterval(interval); // 연결이 끊기면 인터벌 클리어
     });
 
-    ws.send(JSON.stringify({ role: 'ai', content: 'Hello! what can I do for you?', "fin": true }));
+    ws.send(JSON.stringify({ role: 'ai', content: '안녕하세요! 무엇을 도와드릴까요?', "fin": true }));
 });
 
 console.log(`WebSocket server started at ws://localhost:${PORT}`);
