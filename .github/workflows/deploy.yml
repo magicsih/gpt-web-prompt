@@ -8,9 +8,13 @@ on:
 
 env:
   APP_NAME: gpt-web-prompt
+  K8S_KUBECTL_VERSION: "v1.31.0"
+  K8S_DEPLOYMENT_NAME: gpt-web-prompt
+  K8S_CONTAINER_NAME: gpt-web-prompt
+  K8S_NAMESPACE: gpt
 jobs:
 
-  Build:
+  Build_And_Rollout:
 
     runs-on: ubuntu-latest
     environment: production
@@ -39,3 +43,21 @@ jobs:
         push: true
         tags: ${{ secrets.DOCKER_CONTAINER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.commit.outputs.short }}
         platforms: linux/arm64
+    - 
+      name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/${{ env.K8S_KUBECTL_VERSION }}/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+    - 
+      name: Create kubeconfig file
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
+    -
+      name: Rollout      
+      env:
+        KUBECONFIG: /tmp/kubeconfig.yaml
+      run: |
+        kubectl set image deployment/${{ env.K8S_DEPLOYMENT_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ secrets.DOCKER_CONTAINER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.commit.outputs.short }} -n ${{ env.K8S_NAMESPACE }}
+        kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }}
+        kubectl get pod -l app=${{ env.K8S_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }}
