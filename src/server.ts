@@ -71,7 +71,7 @@ wss.on('connection', ws => {
             client.ping(function noop() { });
         });
 
-    }, 5000); // 5초마다 핑
+    }, 5000); // Ping every 5 seconds
 
     ws.on('pong', function incoming() {
         // console.log("pong");
