@@ -14,16 +14,13 @@ env:
   K8S_NAMESPACE: gpt
 jobs:
 
-  Build_And_Rollout:
+  Docker_Build_And_Push:
 
     runs-on: ubuntu-latest
     environment: production
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - 
-      id: commit
-      uses: prompt/actions-commit-hash@v3
     -
       name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -41,23 +38,5 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        tags: ${{ secrets.DOCKER_CONTAINER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.commit.outputs.short }}
+        tags: ${{ secrets.DOCKER_CONTAINER_REGISTRY }}/${{ env.APP_NAME }}:latest
         platforms: linux/arm64
-    - 
-      name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/${{ env.K8S_KUBECTL_VERSION }}/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
-    - 
-      name: Create kubeconfig file
-      run: |
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > /tmp/kubeconfig.yaml
-    -
-      name: Rollout      
-      env:
-        KUBECONFIG: /tmp/kubeconfig.yaml
-      run: |
-        kubectl set image deployment/${{ env.K8S_DEPLOYMENT_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ secrets.DOCKER_CONTAINER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.commit.outputs.short }} -n ${{ env.K8S_NAMESPACE }}
-        kubectl rollout status deployment/${{ env.K8S_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }}
-        kubectl get pod -l app=${{ env.K8S_DEPLOYMENT_NAME }} -n ${{ env.K8S_NAMESPACE }}
