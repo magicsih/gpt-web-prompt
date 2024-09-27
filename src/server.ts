@@ -117,7 +117,7 @@ wss.on('connection', ws => {
         clearInterval(interval); // 연결이 끊기면 인터벌 클리어
     });
 
-    ws.send(JSON.stringify({ role: 'ai', content: '안녕하세요! 무엇을 도와드릴까요?', "fin": true }));
+    ws.send(JSON.stringify({ role: 'ai', content: 'Hello, How can I help you?', "fin": true }));
 });
 
 console.log(`WebSocket server started at ws://localhost:${PORT}`);
