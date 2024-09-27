@@ -23,9 +23,8 @@ env:
 jobs:
   Docker_Build_And_Push:
     runs-on: ubuntu-latest
-    environment: production
     outputs:
-      image_tag: ${{ steps.docker_build.outputs.image_tag }}
+      image_digest: ${{ steps.docker_build.outputs.digest }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -50,6 +49,8 @@ jobs:
         platforms: linux/arm64
         push: true        
         tags: ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
+      outputs:
+        digest: ${{ steps.docker_build.outputs.digest }}
 
   K8S_Deploy:
     runs-on: ubuntu-latest
@@ -71,6 +72,6 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl set image deployment/${{ env.APP_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.APP_NAME }}@${{ steps.docker_build.outputs.built_digest }}
+        kubectl set image deployment/${{ env.APP_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.APP_NAME }}@${{ needs.Docker_Build_And_Push.outputs.image_digest }}
         kubectl rollout status deployment/${{ env.APP_NAME }}
         kubectl get pod -l app=${{ env.APP_NAME }} -n ${{ env.K8S_NAMESPACE }}
