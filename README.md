@@ -12,7 +12,7 @@ Please note that the OPENAI_API_KEY is essential to run this project.
 ### Prerequisites
 - Node.js
 - TypeScript
-- OPENAI_API_KEY
+- OPENAI_API_KEY(default off) or GEMINI_API_KEY(default on)
 
 ### Installation
 1. Clone the repository

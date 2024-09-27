@@ -1,27 +1,40 @@
-# Use the official Node.js 18+ image as the base image
-FROM node:18-alpine
+# ---- Build Stage ----
+# Use the official Node.js 18+ image as the build base
+FROM node:18-alpine AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the working directory
-COPY package*.json ./
-COPY tsconfig.json ./
+# Copy the package.json, package-lock.json, and tsconfig.json files to the working directory
+COPY package*.json tsconfig.json ./
 
 # Install the dependencies
 RUN npm install
 
-# Copy the source code to the working directory
+# Copy the source code and public directory to the working directory
 COPY ./src ./src
-
-# Copy the public directory to the working directory
 COPY ./public ./public
 
 # Build the TypeScript code
 RUN npm run build
 
+
+# ---- Run Stage ----
+# Use a minimal Node.js runtime for the final image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the built files from the build stage to the runtime stage
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
 # Expose port 8080 for the WebSocket server
 EXPOSE 8080
 
-# Run the Node.js server on the built files in the dist directory
+# Run the Node.js server
 CMD ["node", "dist/server.js"]
