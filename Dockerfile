@@ -18,7 +18,6 @@ COPY ./public ./public
 # Build the TypeScript code
 RUN npm run build
 
-
 # ---- Run Stage ----
 # Use a minimal Node.js runtime for the final image
 FROM node:18-alpine
