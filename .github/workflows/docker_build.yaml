@@ -19,6 +19,7 @@ env:
   K8S_TOKEN: ${{ secrets.K8S_TOKEN }}
   K8S_CA_CERT: ${{ secrets.K8S_CA_CERT }}
   K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
+  K8S_CONTAINER_NAME: ${{ env.APP_NAME }}-app
 jobs:
   Docker_Build_And_Push:
     runs-on: ubuntu-latest
@@ -70,5 +71,5 @@ jobs:
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl set image deployment/${{ env.APP_NAME }} ${ env.APP_NAME }=${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
+        kubectl set image deployment/${{ env.APP_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
         kubectl rollout status deployment/${{ env.APP_NAME }}
