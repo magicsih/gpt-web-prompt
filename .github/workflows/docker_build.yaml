@@ -5,16 +5,16 @@ on:
     branches: [ "main" ]
     paths-ignore:
       - "README.md"
-      - ".github/**"
+      # - ".github/**"
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - "README.md"
-      - ".github/**"
+      # - ".github/**"
 
 env:
   APP_NAME: gpt-web-prompt
-  REGISTRY: ${{ secret.DOCKER_REGISTRY}}
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY}}
   REGISTRY_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   REGISTRY_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 jobs:
