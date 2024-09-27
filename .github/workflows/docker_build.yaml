@@ -49,8 +49,6 @@ jobs:
         platforms: linux/arm64
         push: true        
         tags: ${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
-      outputs:
-        digest: ${{ steps.docker_build.outputs.digest }}
 
   K8S_Deploy:
     runs-on: ubuntu-latest
