@@ -29,6 +29,7 @@ WORKDIR /app
 # Copy the built files from the build stage to the runtime stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/public ./public
 
 # Install only production dependencies
 RUN npm install --omit=dev
