@@ -73,3 +73,4 @@ jobs:
       run: |
         kubectl set image deployment/${{ env.APP_NAME }} ${{ env.K8S_CONTAINER_NAME }}=${{ env.REGISTRY }}/${{ env.APP_NAME }}:latest
         kubectl rollout status deployment/${{ env.APP_NAME }}
+        kubectl get pod -l app=${{ env.APP_NAME }} -n ${{ env.K8S_NAMESPACE }}
