@@ -1,3 +1,5 @@
+[![Build and Deploy](https://github.com/magicsih/gpt-web-prompt/actions/workflows/docker_build.yaml/badge.svg)](https://github.com/magicsih/gpt-web-prompt/actions/workflows/docker_build.yaml)
+
 # GPT Web Prompt
 
 ## Overview
