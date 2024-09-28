@@ -2,6 +2,10 @@
 
 # GPT Web Prompt
 
+
+https://github.com/user-attachments/assets/c4e45f59-7193-47b5-b37a-760297207ca0
+
+
 ## Overview
 This project is a web application that runs a web prompt standalone and uses a WebSocket server for a chat interface. It is implemented in TypeScript (`server.ts`) on the server side, while the client side includes an HTML file (`index.html`) and a JavaScript file (`client.js`).
 
